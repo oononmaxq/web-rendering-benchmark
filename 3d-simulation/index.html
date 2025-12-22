@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>3D物理シミュレーション - Web技術実験室</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Menlo', monospace;
+            background: #e0e5ec;
+            color: #333;
+            min-height: 100vh;
+            padding: 40px 20px;
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .back-link {
+            margin-bottom: 30px;
+            animation: slideRight 0.5s ease-out;
+        }
+
+        @keyframes slideRight {
+            from {
+                transform: translateX(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .back-link a {
+            color: #666;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            background: #e0e5ec;
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+                -6px -6px 12px rgba(255, 255, 255, 0.5);
+            display: inline-block;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .back-link a:hover {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+            transform: translateX(5px);
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 48px;
+            margin-bottom: 20px;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+                -2px -2px 4px rgba(163, 177, 198, 0.6);
+            animation: slideDown 0.6s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 20px;
+            color: #666;
+            margin-bottom: 60px;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+            animation: slideDown 0.6s ease-out 0.1s both;
+        }
+
+        .demo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .demo-card {
+            background: #e0e5ec;
+            border: none;
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+                -9px -9px 16px rgba(255, 255, 255, 0.5);
+            animation: cardSlideUp 0.5s ease-out backwards;
+        }
+
+        @keyframes cardSlideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .demo-card:nth-child(1) {
+            animation-delay: 0.2s;
+        }
+
+        .demo-card:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .demo-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #f59e0b, #fbbf24);
+        }
+
+        .rapier-card::before {
+            background: linear-gradient(90deg, #22c55e, #4ade80) !important;
+        }
+
+        .demo-card:hover {
+            box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+                -13px -13px 20px rgba(255, 255, 255, 0.6);
+            transform: translateY(-3px);
+        }
+
+        .demo-title {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: #f59e0b;
+        }
+
+        .rapier-card .demo-title {
+            color: #22c55e;
+        }
+
+        .demo-description {
+            color: #666;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .demo-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .demo-features li {
+            padding: 10px 0;
+            color: #666;
+            border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+        }
+
+        .demo-features li:last-child {
+            border-bottom: none;
+        }
+
+        .demo-button {
+            display: inline-block;
+            width: 100%;
+            padding: 20px;
+            background: #e0e5ec;
+            color: #f59e0b;
+            text-decoration: none;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+                -6px -6px 12px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .demo-button::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(245, 158, 11, 0.2);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .rapier-card .demo-button {
+            color: #22c55e;
+        }
+
+        .rapier-card .demo-button::before {
+            background: rgba(34, 197, 94, 0.2);
+        }
+
+        .demo-button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .demo-button:hover {
+            box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+                inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+            transform: scale(0.98);
+        }
+
+        .purpose-section {
+            background: #e0e5ec;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 40px;
+            box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+                -9px -9px 16px rgba(255, 255, 255, 0.5);
+            animation: fadeInUp 0.6s ease-out 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                transform: translateY(30px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .purpose-section h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+                -2px -2px 4px rgba(163, 177, 198, 0.6);
+        }
+
+        .purpose-section p {
+            color: #666;
+            line-height: 1.8;
+            text-align: center;
+        }
+
+        .comparison-table {
+            background: #e0e5ec;
+            border-radius: 20px;
+            padding: 40px;
+            margin-top: 40px;
+            box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+                -9px -9px 16px rgba(255, 255, 255, 0.5);
+            animation: fadeInUp 0.6s ease-out 0.4s both;
+        }
+
+        .comparison-table h2 {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: #333;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+                -2px -2px 4px rgba(163, 177, 198, 0.6);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+        }
+
+        th {
+            background: #e0e5ec;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .cannon-col {
+            color: #f59e0b;
+        }
+
+        .rapier-col {
+            color: #22c55e;
+        }
+
+        .winner {
+            font-weight: bold;
+            position: relative;
+        }
+
+        .winner::after {
+            content: " ✓";
+            color: #22c55e;
+        }
+
+        @media (max-width: 768px) {
+            .demo-grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="back-link">
+            <a href="/">← トップページに戻る</a>
+        </div>
+
+        <h1>3D物理シミュレーション</h1>
+        <p class="subtitle">JavaScript vs Rust + WebAssembly - 3D物理エンジン性能比較</p>
+
+        <div class="purpose-section">
+            <h2>このページの目的</h2>
+            <p>
+                <strong style="color: #f59e0b;">JavaScript (Cannon.js)</strong>と<strong style="color: #22c55e;">Rust + WebAssembly (Rapier)</strong>の3D物理エンジンを、同じ描画エンジン (Three.js) で実装し、純粋な物理演算のパフォーマンス差を体感比較できるデモサイトです。
+            </p>
+        </div>
+
+        <div class="demo-grid">
+            <div class="demo-card" style="border-top: 5px solid #f59e0b;">
+                <div class="demo-title">Cannon.js (JavaScript)</div>
+                <div class="demo-description">
+                    JavaScript製の物理エンジンCannon.jsを使用。Three.jsで3D描画。箱や球を追加して、重力と衝突判定を体験できます。
+                </div>
+                <ul class="demo-features">
+                    <li>物理エンジン: Cannon.js (JavaScript)</li>
+                    <li>描画: Three.js (WebGL)</li>
+                    <li>期待FPS: 50個で60FPS、500個で20-30FPS</li>
+                    <li>OrbitControls (カメラ操作)</li>
+                    <li>リアルタイム影・シャドウマップ</li>
+                </ul>
+                <a href="/3d-simulation/threejs-cannon/" class="demo-button">デモを開く</a>
+            </div>
+
+            <div class="demo-card rapier-card">
+                <div class="demo-title">Rapier (Rust + wasm)</div>
+                <div class="demo-description">
+                    Rust製の高速物理エンジンRapierをWebAssemblyで実行。同じ描画エンジンで性能差を比較できます。
+                </div>
+                <ul class="demo-features">
+                    <li>物理エンジン: Rapier (Rust + WebAssembly)</li>
+                    <li>描画: Three.js (WebGL)</li>
+                    <li>期待FPS: 500個でも60FPS維持</li>
+                    <li>大規模シミュレーションに最適</li>
+                    <li>ストレステストで性能差を実感</li>
+                </ul>
+                <a href="/3d-simulation/threejs-rapier/" class="demo-button">デモを開く</a>
+            </div>
+        </div>
+
+        <div class="comparison-table">
+            <h2>技術比較</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>項目</th>
+                        <th class="cannon-col">Cannon.js (JavaScript)</th>
+                        <th class="rapier-col">Rapier (Rust + wasm)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>FPS (50個)</td>
+                        <td class="cannon-col">60 FPS (安定)</td>
+                        <td class="rapier-col winner">60 FPS (安定)</td>
+                    </tr>
+                    <tr>
+                        <td>FPS (100個)</td>
+                        <td class="cannon-col">50-60 FPS</td>
+                        <td class="rapier-col winner">60 FPS (安定)</td>
+                    </tr>
+                    <tr>
+                        <td>FPS (500個)</td>
+                        <td class="cannon-col">20-30 FPS (重い)</td>
+                        <td class="rapier-col winner">55-60 FPS (安定)</td>
+                    </tr>
+                    <tr>
+                        <td>FPS (1,000個)</td>
+                        <td class="cannon-col">10-15 FPS (ほぼ停止)</td>
+                        <td class="rapier-col winner">40-50 FPS (動作可能)</td>
+                    </tr>
+                    <tr>
+                        <td>実行速度</td>
+                        <td class="cannon-col">JSエンジン依存</td>
+                        <td class="rapier-col winner">ネイティブに近い速度</td>
+                    </tr>
+                    <tr>
+                        <td>衝突判定精度</td>
+                        <td class="cannon-col">標準的</td>
+                        <td class="rapier-col winner">高精度</td>
+                    </tr>
+                    <tr>
+                        <td>メモリ効率</td>
+                        <td class="cannon-col">GC依存</td>
+                        <td class="rapier-col winner">コンパクト・予測可能</td>
+                    </tr>
+                    <tr>
+                        <td>開発難易度</td>
+                        <td class="cannon-col winner">低 (すぐ始められる)</td>
+                        <td class="rapier-col">中 (wasmの知識必要)</td>
+                    </tr>
+                    <tr>
+                        <td>ファイルサイズ</td>
+                        <td class="cannon-col winner">約150KB (.js)</td>
+                        <td class="rapier-col">約600KB (.wasm)</td>
+                    </tr>
+                    <tr>
+                        <td>初期化時間</td>
+                        <td class="cannon-col winner">即座</td>
+                        <td class="rapier-col">約100ms (wasm読込)</td>
+                    </tr>
+                    <tr>
+                        <td>推奨用途</td>
+                        <td class="cannon-col">小規模・プロトタイプ</td>
+                        <td class="rapier-col">大規模・本格的な物理演算</td>
+                    </tr>
+                    <tr>
+                        <td>性能倍率 (500個時)</td>
+                        <td class="cannon-col">1倍 (基準)</td>
+                        <td class="rapier-col winner">約2-3倍高速</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>

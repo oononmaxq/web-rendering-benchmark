@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>パーティクルシミュレーション比較 - Rust vs TypeScript</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Monaco", "Menlo", monospace;
+        background: #e0e5ec;
+        color: #333;
+        min-height: 100vh;
+        padding: 40px 20px;
+        animation: fadeIn 0.8s ease-out;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 48px;
+        margin-bottom: 20px;
+        color: #333;
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+          -2px -2px 4px rgba(163, 177, 198, 0.6);
+        animation: slideDown 0.6s ease-out;
+      }
+
+      @keyframes slideDown {
+        from {
+          transform: translateY(-30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .subtitle {
+        text-align: center;
+        font-size: 20px;
+        color: #666;
+        margin-bottom: 60px;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+        animation: slideDown 0.6s ease-out 0.1s both;
+      }
+
+      .comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 30px;
+        margin-bottom: 60px;
+      }
+
+      .card {
+        background: #e0e5ec;
+        border: none;
+        border-radius: 20px;
+        padding: 40px;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        position: relative;
+        overflow: hidden;
+        box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+          -9px -9px 16px rgba(255, 255, 255, 0.5);
+        animation: cardSlideUp 0.5s ease-out backwards;
+      }
+
+      @keyframes cardSlideUp {
+        from {
+          transform: translateY(50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .card:nth-child(1) {
+        animation-delay: 0.2s;
+      }
+
+      .card:nth-child(2) {
+        animation-delay: 0.3s;
+      }
+
+      .card:nth-child(3) {
+        animation-delay: 0.4s;
+      }
+
+      .card:nth-child(4) {
+        animation-delay: 0.5s;
+      }
+
+      .card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 5px;
+      }
+
+      .rust-card::before {
+        background: linear-gradient(90deg, #4ade80, #22d3ee);
+      }
+
+      .rust-card:hover {
+        box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+          -13px -13px 20px rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
+      }
+
+      .ts-card::before {
+        background: linear-gradient(90deg, #3178c6, #61dafb);
+      }
+
+      .ts-card:hover {
+        box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+          -13px -13px 20px rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
+      }
+
+      .svg-card::before {
+        background: linear-gradient(90deg, #9c27b0, #ce93d8);
+      }
+
+      .svg-card:hover {
+        box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+          -13px -13px 20px rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
+      }
+
+      .svg-card .card-title {
+        color: #9c27b0;
+      }
+
+      .svg-card .spec-value {
+        color: #9c27b0;
+      }
+
+      .svg-card .demo-button {
+        background: #e0e5ec;
+        color: #9c27b0;
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+          -6px -6px 12px rgba(255, 255, 255, 0.5);
+      }
+
+      .svg-card .demo-button:hover {
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+
+      .threejs-card::before {
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
+      }
+
+      .threejs-card:hover {
+        box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+          -13px -13px 20px rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
+      }
+
+      .threejs-card .card-title {
+        color: #f59e0b;
+      }
+
+      .threejs-card .spec-value {
+        color: #f59e0b;
+      }
+
+      .threejs-card .demo-button {
+        background: #e0e5ec;
+        color: #f59e0b;
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+          -6px -6px 12px rgba(255, 255, 255, 0.5);
+      }
+
+      .threejs-card .demo-button:hover {
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+
+      .card-title {
+        font-size: 32px;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      .rust-card .card-title {
+        color: #22c55e;
+      }
+
+      .ts-card .card-title {
+        color: #3178c6;
+      }
+
+      .tech-stack {
+        list-style: none;
+        margin: 20px 0;
+      }
+
+      .tech-stack li {
+        padding: 10px 0;
+        border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+        color: #666;
+      }
+
+      .tech-stack li:last-child {
+        border-bottom: none;
+      }
+
+      .tech-stack a {
+        color: #3178c6;
+        text-decoration: none;
+        border-bottom: 1px solid rgba(49, 120, 198, 0.3);
+        transition: all 0.2s;
+      }
+
+      .tech-stack a:hover {
+        color: #22c55e;
+        border-bottom-color: rgba(34, 197, 94, 0.5);
+      }
+
+      .spec {
+        background: #e0e5ec;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 20px 0;
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.4),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.3);
+      }
+
+      .spec-title {
+        color: #666;
+        font-size: 14px;
+        margin-bottom: 10px;
+      }
+
+      .spec-value {
+        font-size: 24px;
+        font-weight: bold;
+      }
+
+      .rust-card .spec-value {
+        color: #22c55e;
+      }
+
+      .ts-card .spec-value {
+        color: #3178c6;
+      }
+
+      .demo-button {
+        display: inline-block;
+        width: 100%;
+        padding: 20px;
+        margin-top: 20px;
+        background: #e0e5ec;
+        color: #333;
+        text-decoration: none;
+        text-align: center;
+        font-size: 20px;
+        font-weight: bold;
+        border-radius: 10px;
+        transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+          -6px -6px 12px rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .demo-button::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+
+      .demo-button:hover::before {
+        width: 300px;
+        height: 300px;
+      }
+
+      .rust-card .demo-button {
+        color: #22c55e;
+      }
+
+      .ts-card .demo-button {
+        color: #3178c6;
+      }
+
+      .demo-button:hover {
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+        transform: scale(0.98);
+      }
+
+      .demo-button:active {
+        transform: scale(0.95);
+      }
+
+      .comparison-table {
+        background: #e0e5ec;
+        border: none;
+        border-radius: 20px;
+        padding: 40px;
+        margin-top: 40px;
+        box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+          -9px -9px 16px rgba(255, 255, 255, 0.5);
+        animation: fadeInUp 0.6s ease-out 0.5s both;
+      }
+
+      @keyframes fadeInUp {
+        from {
+          transform: translateY(30px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .comparison-table h2 {
+        text-align: center;
+        font-size: 32px;
+        margin-bottom: 30px;
+        color: #333;
+        text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+          -2px -2px 4px rgba(163, 177, 198, 0.6);
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      th,
+      td {
+        padding: 15px;
+        text-align: left;
+        border-bottom: 1px solid rgba(163, 177, 198, 0.2);
+      }
+
+      th {
+        background: #e0e5ec;
+        color: #333;
+        font-weight: bold;
+      }
+
+      .rust-col {
+        color: #22c55e;
+      }
+
+      .ts-col {
+        color: #3178c6;
+      }
+
+      .winner {
+        font-weight: bold;
+        position: relative;
+      }
+
+      .winner::after {
+        content: " ✓";
+        color: #22c55e;
+      }
+
+      @media (max-width: 768px) {
+        .comparison-grid {
+          grid-template-columns: 1fr;
+        }
+
+        h1 {
+          font-size: 32px;
+        }
+      }
+
+      /* カスタムダイアログ */
+      .dialog-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .dialog-overlay.active {
+        display: flex;
+      }
+
+      .dialog-box {
+        background: #e0e5ec;
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 500px;
+        box-shadow: 20px 20px 40px rgba(163, 177, 198, 0.6),
+          -20px -20px 40px rgba(255, 255, 255, 0.5);
+        animation: dialogSlide 0.3s ease-out;
+      }
+
+      @keyframes dialogSlide {
+        from {
+          transform: translateY(-50px);
+          opacity: 0;
+        }
+        to {
+          transform: translateY(0);
+          opacity: 1;
+        }
+      }
+
+      .dialog-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        color: #333;
+        text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+      }
+
+      .dialog-title.warning {
+        color: #f59e0b;
+      }
+
+      .dialog-title.danger {
+        color: #ef4444;
+      }
+
+      .dialog-message {
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 30px;
+      }
+
+      .dialog-buttons {
+        display: flex;
+        gap: 15px;
+      }
+
+      .dialog-button {
+        flex: 1;
+        padding: 15px;
+        border: none;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: #e0e5ec;
+        color: #333;
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+          -6px -6px 12px rgba(255, 255, 255, 0.5);
+      }
+
+      .dialog-button:hover {
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+
+      .dialog-button.primary {
+        color: #3178c6;
+      }
+
+      .dialog-button.danger {
+        color: #ef4444;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>パーティクルシミュレーション比較</h1>
+      <p class="subtitle">
+        Rust + WebAssembly + WebGL vs TypeScript (各種描画方式)
+      </p>
+
+      <div class="comparison-table" style="margin-bottom: 40px">
+        <h2>このページの目的</h2>
+        <p style="color: #666; line-height: 1.8; text-align: center">
+          <strong style="color: #22c55e">Rust + WebAssembly + WebGL</strong
+          >と<strong style="color: #3178c6">TypeScript (Canvas2D/SVG)</strong
+          >のパフォーマンスを、<br />
+          同じ物理演算を10,000個・100,000個・500,000個の3スケールで実装し、実際に体感比較できるデモサイトです。
+        </p>
+      </div>
+
+      <div class="comparison-grid">
+        <div class="card rust-card">
+          <div class="card-title">Rust + WebAssembly</div>
+
+          <ul class="tech-stack">
+            <li>言語: Rust</li>
+            <li>
+              ランタイム:
+              <a
+                href="https://developer.mozilla.org/ja/docs/WebAssembly"
+                target="_blank"
+                >WebAssembly</a
+              >
+            </li>
+            <li>
+              描画:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/API/WebGL_API"
+                target="_blank"
+                >WebGL</a
+              >
+              (GPU加速)
+            </li>
+            <li>ビルドツール: wasm-pack</li>
+          </ul>
+
+          <div class="spec">
+            <div class="spec-title">パーティクル数</div>
+            <div class="spec-value">10,000 個</div>
+          </div>
+
+          <div class="spec">
+            <div class="spec-title">期待FPS</div>
+            <div class="spec-value">60 FPS (安定)</div>
+          </div>
+
+          <a href="/particle-simulation/rust-wasm-webgl/" class="demo-button">10,000個デモ</a>
+          <a href="/particle-simulation/rust-wasm-webgl-100k/" class="demo-button">100,000個デモ</a>
+          <a href="/particle-simulation/rust-wasm-webgl-500k/" class="demo-button">500,000個デモ</a>
+        </div>
+
+        <div class="card ts-card">
+          <div class="card-title">TypeScript + Canvas</div>
+
+          <ul class="tech-stack">
+            <li>
+              言語:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference"
+                target="_blank"
+                >TypeScript</a
+              >
+            </li>
+            <li>ランタイム: JavaScript (V8)</li>
+            <li>
+              描画:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/API/Canvas_API"
+                target="_blank"
+                >Canvas 2D API</a
+              >
+            </li>
+            <li>ビルドツール: なし</li>
+          </ul>
+
+          <div class="spec">
+            <div class="spec-title">パーティクル数</div>
+            <div class="spec-value">10,000 個</div>
+          </div>
+
+          <div class="spec">
+            <div class="spec-title">期待FPS</div>
+            <div class="spec-value">40-50 FPS</div>
+          </div>
+
+          <a href="/particle-simulation/typescript-canvas/" class="demo-button">10,000個デモ</a>
+          <a href="/particle-simulation/typescript-canvas-100k/" class="demo-button"
+            >100,000個デモ</a
+          >
+          <a
+            href="#"
+            class="demo-button"
+            onclick="event.preventDefault(); showDialog('⚠️ 警告', 'Canvas2Dで<strong>500,000個</strong>のパーティクルを描画します。<br><br>• ブラウザが非常に重くなります<br>• フリーズする可能性があります<br>• FPSが1桁まで低下する可能性が高いです<br><br>本当に開きますか？', '/particle-simulation/typescript-canvas-500k/', 'warning');"
+            >500,000個デモ (危険)</a
+          >
+        </div>
+
+        <div class="card svg-card">
+          <div class="card-title">TypeScript + SVG</div>
+
+          <ul class="tech-stack">
+            <li>
+              言語:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference"
+                target="_blank"
+                >TypeScript</a
+              >
+            </li>
+            <li>ランタイム: JavaScript (V8)</li>
+            <li>
+              描画:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/SVG"
+                target="_blank"
+                >SVG</a
+              >
+              (<a
+                href="https://developer.mozilla.org/ja/docs/Web/API/Document_Object_Model"
+                target="_blank"
+                >DOM</a
+              >操作)
+            </li>
+            <li>ビルドツール: なし</li>
+          </ul>
+
+          <div class="spec">
+            <div class="spec-title">パーティクル数</div>
+            <div class="spec-value">10,000 個</div>
+          </div>
+
+          <div class="spec">
+            <div class="spec-title">期待FPS</div>
+            <div class="spec-value">5-15 FPS</div>
+          </div>
+
+          <a href="/particle-simulation/typescript-svg/" class="demo-button">10,000個デモ</a>
+          <a
+            href="#"
+            class="demo-button"
+            onclick="event.preventDefault(); showDialog('警告', 'SVGで<strong>100,000個</strong>のDOM要素を生成します。<br><br>• ブラウザが重くなります<br>• フリーズする可能性があります<br>• FPSが大幅に低下します<br><br>本当に開きますか？', '/particle-simulation/typescript-svg-100k/', 'warning');"
+            >100,000個デモ (危険)</a
+          >
+          <a
+            href="#"
+            class="demo-button"
+            onclick="event.preventDefault(); showDialog('重大な警告', 'SVGで<strong>500,000個</strong>のDOM要素を生成します！<br><br>• ブラウザが100%フリーズします！<br>• PCが応答しなくなる可能性があります！<br>• 完全にフリーズする可能性が極めて高いです！<br><br><strong style=\'color: #ef4444;\'>推奨: 開かない</strong><br><br>本当に開きますか？', '/particle-simulation/typescript-svg-500k/', 'danger');"
+            >500,000個デモ (超危険)</a
+          >
+        </div>
+      </div>
+
+      <div class="comparison-table">
+        <h2>技術比較</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>項目</th>
+              <th class="rust-col">Rust + WASM + WebGL</th>
+              <th class="ts-col">TS + Canvas2D</th>
+              <th style="color: #9c27b0">TS + SVG</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>FPS (10,000個)</td>
+              <td class="rust-col winner">60 FPS (安定)</td>
+              <td class="ts-col">40-50 FPS</td>
+              <td style="color: #9c27b0">5-15 FPS</td>
+            </tr>
+            <tr>
+              <td>FPS (100,000個)</td>
+              <td class="rust-col winner">60 FPS (安定)</td>
+              <td class="ts-col">10-20 FPS (重い)</td>
+              <td style="color: #9c27b0">1-5 FPS (超重い)</td>
+            </tr>
+            <tr>
+              <td>FPS (500,000個)</td>
+              <td class="rust-col winner">55-60 FPS (動作可能)</td>
+              <td class="ts-col">1-5 FPS (ほぼ停止)</td>
+              <td style="color: #9c27b0">0 FPS (完全フリーズ)</td>
+            </tr>
+            <tr>
+              <td>実行速度</td>
+              <td class="rust-col winner">ネイティブに近い速度</td>
+              <td class="ts-col">JSエンジン依存</td>
+              <td style="color: #9c27b0">JSエンジン依存</td>
+            </tr>
+            <tr>
+              <td>描画方式</td>
+              <td class="rust-col winner">GPU加速 (WebGL)</td>
+              <td class="ts-col">CPU描画 (Canvas2D)</td>
+              <td style="color: #9c27b0">DOM操作 (最遅)</td>
+            </tr>
+            <tr>
+              <td>メモリ効率</td>
+              <td class="rust-col winner">コンパクト・予測可能</td>
+              <td class="ts-col">GC依存</td>
+              <td style="color: #9c27b0">DOM要素で巨大</td>
+            </tr>
+            <tr>
+              <td>開発難易度</td>
+              <td class="rust-col">高 (学習曲線あり)</td>
+              <td class="ts-col winner">低 (すぐ始められる)</td>
+              <td style="color: #9c27b0" class="winner">最低 (宣言的)</td>
+            </tr>
+            <tr>
+              <td>ビルド時間</td>
+              <td class="rust-col">1-2秒</td>
+              <td class="ts-col winner">なし</td>
+              <td style="color: #9c27b0" class="winner">なし</td>
+            </tr>
+            <tr>
+              <td>ファイルサイズ</td>
+              <td class="rust-col">約150KB (.wasm)</td>
+              <td class="ts-col winner">約5KB (.js)</td>
+              <td style="color: #9c27b0" class="winner">約3KB (.js)</td>
+            </tr>
+            <tr>
+              <td>推奨用途</td>
+              <td class="rust-col">大規模・高速処理</td>
+              <td class="ts-col">中規模アニメーション</td>
+              <td style="color: #9c27b0">少数のベクター図形</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- カスタムダイアログ -->
+    <div id="dialog-overlay" class="dialog-overlay">
+      <div class="dialog-box">
+        <div id="dialog-title" class="dialog-title"></div>
+        <div id="dialog-message" class="dialog-message"></div>
+        <div class="dialog-buttons">
+          <button id="dialog-cancel" class="dialog-button primary">
+            キャンセル
+          </button>
+          <button id="dialog-confirm" class="dialog-button danger">開く</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const dialogOverlay = document.getElementById("dialog-overlay");
+      const dialogTitle = document.getElementById("dialog-title");
+      const dialogMessage = document.getElementById("dialog-message");
+      const dialogCancel = document.getElementById("dialog-cancel");
+      const dialogConfirm = document.getElementById("dialog-confirm");
+
+      let targetUrl = "";
+
+      function showDialog(title, message, url, level = "warning") {
+        dialogTitle.textContent = title;
+        dialogTitle.className = "dialog-title " + level;
+        dialogMessage.innerHTML = message;
+        targetUrl = url;
+        dialogOverlay.classList.add("active");
+      }
+
+      function hideDialog() {
+        dialogOverlay.classList.remove("active");
+      }
+
+      dialogCancel.addEventListener("click", hideDialog);
+
+      dialogConfirm.addEventListener("click", () => {
+        hideDialog();
+        window.location.href = targetUrl;
+      });
+
+      dialogOverlay.addEventListener("click", (e) => {
+        if (e.target === dialogOverlay) {
+          hideDialog();
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,284 @@
+/* ニューモフィズムデザイン - デモページ共通スタイル */
+body {
+  margin: 0;
+  padding: 20px;
+  background: #e0e5ec;
+  font-family: "Monaco", "Menlo", monospace;
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100vh;
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+h1 {
+  font-size: 32px;
+  margin: 20px 0;
+  color: #333;
+  text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.8),
+    -2px -2px 4px rgba(163, 177, 198, 0.6);
+  animation: slideDown 0.5s ease-out 0.1s both;
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+#stats {
+  background: #e0e5ec;
+  border: none;
+  padding: 30px;
+  margin: 20px 0;
+  border-radius: 20px;
+  min-width: 400px;
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+    -9px -9px 16px rgba(255, 255, 255, 0.5);
+  animation: scaleIn 0.5s ease-out 0.3s both;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.stat {
+  font-size: 18px;
+  margin: 15px 0;
+  display: flex;
+  justify-content: space-between;
+  color: #666;
+}
+
+.stat-label {
+  color: #666;
+}
+
+.stat-value {
+  font-weight: bold;
+}
+
+/* Rustカラー */
+.rust-theme .stat-value {
+  color: #22c55e;
+}
+
+.rust-theme h1 {
+  color: #22c55e;
+}
+
+/* TypeScriptカラー */
+.ts-theme .stat-value {
+  color: #3178c6;
+}
+
+.ts-theme h1 {
+  color: #3178c6;
+}
+
+/* SVGカラー */
+.svg-theme .stat-value {
+  color: #9c27b0;
+}
+
+.svg-theme h1 {
+  color: #9c27b0;
+}
+
+canvas,
+svg {
+  border: none;
+  border-radius: 20px;
+  cursor: crosshair;
+  background: #e0e5ec;
+  box-shadow: inset 8px 8px 16px rgba(163, 177, 198, 0.5),
+    inset -8px -8px 16px rgba(255, 255, 255, 0.4);
+  animation: scaleIn 0.6s ease-out 0.2s both;
+  transition: transform 0.3s ease;
+}
+
+canvas:hover,
+svg:hover {
+  transform: scale(1.01);
+}
+
+button {
+  background: #e0e5ec;
+  color: #333;
+  border: none;
+  padding: 15px 40px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  border-radius: 10px;
+  margin: 10px;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.5);
+  animation: fadeInUp 0.5s ease-out 0.4s both;
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:hover::before {
+  width: 200px;
+  height: 200px;
+}
+
+button:hover {
+  box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+  transform: scale(0.98);
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+@keyframes fadeInUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.rust-theme button {
+  color: #22c55e;
+}
+
+.ts-theme button {
+  color: #3178c6;
+}
+
+.svg-theme button {
+  color: #9c27b0;
+}
+
+#message {
+  background: #e0e5ec;
+  border: none;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 20px;
+  max-width: 800px;
+  text-align: center;
+  color: #666;
+  line-height: 1.8;
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+    -9px -9px 16px rgba(255, 255, 255, 0.5);
+  animation: fadeInUp 0.5s ease-out 0.5s both;
+}
+
+#message p {
+  margin: 10px 0;
+}
+
+.highlight {
+  font-weight: bold;
+}
+
+.rust-theme .highlight {
+  color: #22c55e;
+}
+
+.ts-theme .highlight {
+  color: #3178c6;
+}
+
+.svg-theme .highlight {
+  color: #9c27b0;
+}
+
+.back-link {
+  margin: 20px 0;
+  align-self: flex-start;
+  animation: slideRight 0.5s ease-out;
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.back-link a {
+  color: #666;
+  text-decoration: none;
+  font-size: 18px;
+  padding: 10px 20px;
+  border-radius: 10px;
+  background: #e0e5ec;
+  box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+    -6px -6px 12px rgba(255, 255, 255, 0.5);
+  display: inline-block;
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.back-link a:hover {
+  box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+  transform: translateX(-5px);
+}
+
+.warning {
+  background: #e0e5ec;
+  border: none;
+  padding: 25px;
+  margin: 20px 0;
+  border-radius: 20px;
+  max-width: 800px;
+  text-align: center;
+  line-height: 1.8;
+  box-shadow: 9px 9px 16px rgba(163, 177, 198, 0.6),
+    -9px -9px 16px rgba(255, 255, 255, 0.5);
+}
+
+.warning p {
+  margin: 10px 0;
+  color: #ef4444;
+  font-weight: bold;
+}

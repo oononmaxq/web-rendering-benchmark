@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TypeScript + Canvas2D</title>
+    <link rel="stylesheet" href="/particle-simulation/demo-style.css">
+</head>
+<body class="ts-theme">
+    <div class="back-link">
+        <a href="/particle-simulation/">← 比較ページに戻る</a>
+    </div>
+
+    <h1>100,000 Particles - TypeScript + Canvas2D</h1>
+
+    <canvas id="canvas" width="1200" height="800"></canvas>
+
+    <div id="stats">
+        <div class="stat">
+            <span class="stat-label">パーティクル数:</span>
+            <span class="stat-value">100,000 個</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">フレームカウント:</span>
+            <span class="stat-value" id="frame-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">FPS:</span>
+            <span class="stat-value" id="fps">60</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">計算エンジン:</span>
+            <span class="stat-value">JavaScript (V8)</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">描画エンジン:</span>
+            <span class="stat-value">Canvas 2D API</span>
+        </div>
+    </div>
+
+    <button onclick="reset()">リセット</button>
+
+    <div id="message">
+        <p><span class="highlight">クリックして爆発させてください!</span></p>
+        <p>TypeScriptで10万個のパーティクルを物理演算し、Canvas2Dで描画</p>
+        <p>この数だとかなり重くなります!</p>
+    </div>
+
+    <div class="warning">
+        <p>警告: 10万個でもブラウザが重くなります!</p>
+        <p>FPSが大幅に低下する可能性があります</p>
+    </div>
+
+    <script type="module">
+        import { PHYSICS_CONSTANTS } from '/particle-simulation/physics-constants.js';
+
+        const PARTICLE_COUNT = 100000;
+        const GRAVITY = PHYSICS_CONSTANTS.GRAVITY;
+        const BOUNCE = PHYSICS_CONSTANTS.BOUNCE;
+        const EXPLOSION_FORCE = PHYSICS_CONSTANTS.EXPLOSION_FORCE;
+        const EXPLOSION_RADIUS = PHYSICS_CONSTANTS.EXPLOSION_RADIUS;
+        const FRICTION = PHYSICS_CONSTANTS.FRICTION;
+
+        class Particle {
+            constructor(width, height) {
+                const angle = Math.random() * 2 * Math.PI;
+                const speed = Math.random() * (PHYSICS_CONSTANTS.INITIAL_SPEED_MAX - PHYSICS_CONSTANTS.INITIAL_SPEED_MIN) + PHYSICS_CONSTANTS.INITIAL_SPEED_MIN;
+
+                this.x = width / 2;
+                this.y = height / 4;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed + PHYSICS_CONSTANTS.INITIAL_VY_OFFSET;
+                this.size = Math.random() * (PHYSICS_CONSTANTS.PARTICLE_SIZE_MAX - PHYSICS_CONSTANTS.PARTICLE_SIZE_MIN) + PHYSICS_CONSTANTS.PARTICLE_SIZE_MIN;
+                this.hue = Math.random() * 360;
+            }
+
+            update(width, height) {
+                // 重力
+                this.vy += GRAVITY;
+
+                // 位置更新
+                this.x += this.vx;
+                this.y += this.vy;
+
+                // 壁で跳ね返る
+                if (this.x < 0 || this.x > width) {
+                    this.vx *= -BOUNCE;
+                    this.x = Math.max(0, Math.min(width, this.x));
+                }
+
+                if (this.y < 0) {
+                    this.vy *= -BOUNCE;
+                    this.y = 0;
+                }
+
+                if (this.y > height) {
+                    this.vy *= -BOUNCE;
+                    this.y = height;
+                    this.vx *= FRICTION;
+                }
+
+                // 色を変化
+                this.hue = (this.hue + PHYSICS_CONSTANTS.HUE_SHIFT_SPEED) % 360;
+            }
+
+            explode(clickX, clickY) {
+                const dx = this.x - clickX;
+                const dy = this.y - clickY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < EXPLOSION_RADIUS) {
+                    const force = EXPLOSION_FORCE * (1.0 - dist / EXPLOSION_RADIUS);
+                    const angle = Math.atan2(dy, dx);
+                    this.vx += Math.cos(angle) * force;
+                    this.vy += Math.sin(angle) * force;
+                }
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        let particles = [];
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fps = 60;
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Particle(width, height));
+            }
+            frameCount = 0;
+        }
+
+        createParticles();
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            particles.forEach(p => p.explode(x, y));
+        });
+
+        window.reset = createParticles;
+
+        function animate() {
+            // FPS計算
+            const now = performance.now();
+            const delta = now - lastTime;
+            frameCount++;
+
+            if (frameCount % 60 === 0) {
+                fps = Math.round(1000 / delta);
+                document.getElementById('fps').textContent = fps;
+            }
+
+            lastTime = now;
+
+            // 画面クリア
+            ctx.fillStyle = 'rgba(17, 17, 17, 1)';
+            ctx.fillRect(0, 0, width, height);
+
+            // パーティクル更新と描画
+            particles.forEach(p => {
+                p.update(width, height);
+
+                ctx.fillStyle = `hsla(${p.hue}, 100%, 50%, 0.8)`;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, PHYSICS_CONSTANTS.RENDER_SIZE, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // フレームカウント更新
+            document.getElementById('frame-count').textContent = frameCount;
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rust + WebAssembly + WebGL</title>
+    <link rel="stylesheet" href="/particle-simulation/demo-style.css">
+</head>
+<body class="rust-theme">
+    <div class="back-link">
+        <a href="/particle-simulation/">← 比較ページに戻る</a>
+    </div>
+
+    <h1>100,000 Particles - Rust + WebAssembly + WebGL</h1>
+
+    <canvas id="canvas" width="1200" height="800"></canvas>
+
+    <div id="stats">
+        <div class="stat">
+            <span class="stat-label">パーティクル数:</span>
+            <span class="stat-value">100,000 個</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">フレームカウント:</span>
+            <span class="stat-value" id="frame-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">FPS:</span>
+            <span class="stat-value" id="fps">60</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">計算エンジン:</span>
+            <span class="stat-value">Rust + WebAssembly</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">描画エンジン:</span>
+            <span class="stat-value">WebGL (GPU加速)</span>
+        </div>
+    </div>
+
+    <button onclick="reset()">リセット</button>
+
+    <div id="message">
+        <p><span class="highlight">クリックして爆発させてください!</span></p>
+        <p>Rustで10万個のパーティクルを物理演算し、WebGLでGPU加速描画</p>
+        <p>この数はTypeScriptでは到達不可能な領域です!</p>
+    </div>
+
+    <script type="module">
+        import init, { ParticleSystem } from './pkg/particle_webgl.js';
+
+        let system;
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
+
+        async function run() {
+            await init();
+
+            system = new ParticleSystem('canvas', 100000);
+
+            // クリックイベント
+            const canvas = document.getElementById('canvas');
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                system.explode(x, y);
+            });
+
+            function animate() {
+                // FPS計算
+                const now = performance.now();
+                const delta = now - lastTime;
+                frameCount++;
+
+                if (frameCount % 60 === 0) {
+                    fps = Math.round(1000 / delta);
+                    document.getElementById('fps').textContent = fps;
+                }
+
+                lastTime = now;
+
+                // Rustで物理演算
+                system.update();
+
+                // WebGLで描画
+                system.render();
+
+                // フレームカウント更新
+                document.getElementById('frame-count').textContent = system.get_frame_count();
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        window.reset = function() {
+            if (system) {
+                system.reset();
+            }
+        };
+
+        run();
+    </script>
+</body>
+</html>

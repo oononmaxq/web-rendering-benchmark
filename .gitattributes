@@ -1,0 +1,9 @@
+# Rustコードを統計に含める
+*.rs linguist-language=Rust
+
+# 統計に含めない
+*.html linguist-vendored
+*.css linguist-vendored
+Makefile linguist-vendored
+*.DTrace linguist-vendored
+*.md linguist-documentation
