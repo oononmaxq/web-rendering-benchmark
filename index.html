@@ -104,47 +104,27 @@
             animation-delay: 0.3s;
         }
 
-        .category-card::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 5px;
-        }
-
-        .particle-category::before {
-            background: linear-gradient(90deg, #4ade80, #22d3ee);
-        }
-
-        .particle-category:hover {
+        .category-card:hover {
             box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
                 -13px -13px 20px rgba(255, 255, 255, 0.6);
             transform: translateY(-5px);
         }
 
-        .physics-category::before {
-            background: linear-gradient(90deg, #f59e0b, #fbbf24);
-        }
-
-        .physics-category:hover {
-            box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
-                -13px -13px 20px rgba(255, 255, 255, 0.6);
-            transform: translateY(-5px);
+        .category-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: inset 2px 2px 4px rgba(163, 177, 198, 0.3),
+                inset -2px -2px 4px rgba(255, 255, 255, 0.3);
         }
 
         .category-title {
             font-size: 36px;
             margin-bottom: 20px;
             font-weight: bold;
-        }
-
-        .particle-category .category-title {
-            color: #22c55e;
-        }
-
-        .physics-category .category-title {
-            color: #f59e0b;
+            color: #333;
         }
 
         .category-description {
@@ -204,14 +184,6 @@
         .category-button:hover::before {
             width: 300px;
             height: 300px;
-        }
-
-        .particle-category .category-button {
-            color: #22c55e;
-        }
-
-        .physics-category .category-button {
-            color: #f59e0b;
         }
 
         .category-button:hover {
@@ -274,7 +246,8 @@
         <p class="subtitle">Rust + WebAssembly vs TypeScript - 実測パフォーマンス比較</p>
 
         <div class="category-grid">
-            <a href="/particle-simulation/" class="category-card particle-category">
+            <a href="particle-simulation/" class="category-card particle-category">
+                <img src="img/particl.png" alt="パーティクルシミュレーション" class="category-image">
                 <div class="category-title">パーティクルシミュレーション</div>
                 <div class="category-description">
                     同じ物理演算を異なる技術スタックで実装し、実際のパフォーマンス差を体感できます。
@@ -288,7 +261,8 @@
                 <div class="category-button">パーティクル比較を見る →</div>
             </a>
 
-            <a href="/3d-simulation/" class="category-card physics-category">
+            <a href="3d-simulation/" class="category-card physics-category">
+                <img src="img/3d.png" alt="3D物理シミュレーション" class="category-image">
                 <div class="category-title">3D物理シミュレーション</div>
                 <div class="category-description">
                     Three.jsとCannon.jsを使った3D物理エンジンのデモ集。インタラクティブな3D空間で物理演算を体験できます。

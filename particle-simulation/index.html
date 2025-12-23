@@ -130,7 +130,7 @@
       }
 
       .ts-card::before {
-        background: linear-gradient(90deg, #3178c6, #61dafb);
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
       }
 
       .ts-card:hover {
@@ -140,7 +140,7 @@
       }
 
       .svg-card::before {
-        background: linear-gradient(90deg, #9c27b0, #ce93d8);
+        background: linear-gradient(90deg, #f59e0b, #fbbf24);
       }
 
       .svg-card:hover {
@@ -150,16 +150,16 @@
       }
 
       .svg-card .card-title {
-        color: #9c27b0;
+        color: #f59e0b;
       }
 
       .svg-card .spec-value {
-        color: #9c27b0;
+        color: #f59e0b;
       }
 
       .svg-card .demo-button {
         background: #e0e5ec;
-        color: #9c27b0;
+        color: #f59e0b;
         box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
           -6px -6px 12px rgba(255, 255, 255, 0.5);
       }
@@ -210,7 +210,7 @@
       }
 
       .ts-card .card-title {
-        color: #3178c6;
+        color: #f59e0b;
       }
 
       .tech-stack {
@@ -265,7 +265,7 @@
       }
 
       .ts-card .spec-value {
-        color: #3178c6;
+        color: #f59e0b;
       }
 
       .demo-button {
@@ -310,7 +310,7 @@
       }
 
       .ts-card .demo-button {
-        color: #3178c6;
+        color: #f59e0b;
       }
 
       .demo-button:hover {
@@ -377,7 +377,7 @@
       }
 
       .ts-col {
-        color: #3178c6;
+        color: #f59e0b;
       }
 
       .winner {
@@ -507,7 +507,7 @@
         <h2>このページの目的</h2>
         <p style="color: #666; line-height: 1.8; text-align: center">
           <strong style="color: #22c55e">Rust + WebAssembly + WebGL</strong
-          >と<strong style="color: #3178c6">TypeScript (Canvas2D/SVG)</strong
+          >と<strong style="color: #f59e0b">TypeScript (Canvas2D/SVG)</strong
           >のパフォーマンスを、<br />
           同じ物理演算を10,000個・100,000個・500,000個の3スケールで実装し、実際に体感比較できるデモサイトです。
         </p>
@@ -663,7 +663,7 @@
               <th>項目</th>
               <th class="rust-col">Rust + WASM + WebGL</th>
               <th class="ts-col">TS + Canvas2D</th>
-              <th style="color: #9c27b0">TS + SVG</th>
+              <th class="ts-col">TS + SVG</th>
             </tr>
           </thead>
           <tbody>
@@ -671,61 +671,61 @@
               <td>FPS (10,000個)</td>
               <td class="rust-col winner">60 FPS (安定)</td>
               <td class="ts-col">40-50 FPS</td>
-              <td style="color: #9c27b0">5-15 FPS</td>
+              <td class="ts-col">5-15 FPS</td>
             </tr>
             <tr>
               <td>FPS (100,000個)</td>
               <td class="rust-col winner">60 FPS (安定)</td>
               <td class="ts-col">10-20 FPS (重い)</td>
-              <td style="color: #9c27b0">1-5 FPS (超重い)</td>
+              <td class="ts-col">1-5 FPS (超重い)</td>
             </tr>
             <tr>
               <td>FPS (500,000個)</td>
               <td class="rust-col winner">55-60 FPS (動作可能)</td>
               <td class="ts-col">1-5 FPS (ほぼ停止)</td>
-              <td style="color: #9c27b0">0 FPS (完全フリーズ)</td>
+              <td class="ts-col">0 FPS (完全フリーズ)</td>
             </tr>
             <tr>
               <td>実行速度</td>
               <td class="rust-col winner">ネイティブに近い速度</td>
               <td class="ts-col">JSエンジン依存</td>
-              <td style="color: #9c27b0">JSエンジン依存</td>
+              <td class="ts-col">JSエンジン依存</td>
             </tr>
             <tr>
               <td>描画方式</td>
               <td class="rust-col winner">GPU加速 (WebGL)</td>
               <td class="ts-col">CPU描画 (Canvas2D)</td>
-              <td style="color: #9c27b0">DOM操作 (最遅)</td>
+              <td class="ts-col">DOM操作 (最遅)</td>
             </tr>
             <tr>
               <td>メモリ効率</td>
               <td class="rust-col winner">コンパクト・予測可能</td>
               <td class="ts-col">GC依存</td>
-              <td style="color: #9c27b0">DOM要素で巨大</td>
+              <td class="ts-col">DOM要素で巨大</td>
             </tr>
             <tr>
               <td>開発難易度</td>
               <td class="rust-col">高 (学習曲線あり)</td>
               <td class="ts-col winner">低 (すぐ始められる)</td>
-              <td style="color: #9c27b0" class="winner">最低 (宣言的)</td>
+              <td class="ts-col winner">最低 (宣言的)</td>
             </tr>
             <tr>
               <td>ビルド時間</td>
               <td class="rust-col">1-2秒</td>
               <td class="ts-col winner">なし</td>
-              <td style="color: #9c27b0" class="winner">なし</td>
+              <td class="ts-col winner">なし</td>
             </tr>
             <tr>
               <td>ファイルサイズ</td>
               <td class="rust-col">約150KB (.wasm)</td>
               <td class="ts-col winner">約5KB (.js)</td>
-              <td style="color: #9c27b0" class="winner">約3KB (.js)</td>
+              <td class="ts-col winner">約3KB (.js)</td>
             </tr>
             <tr>
               <td>推奨用途</td>
               <td class="rust-col">大規模・高速処理</td>
               <td class="ts-col">中規模アニメーション</td>
-              <td style="color: #9c27b0">少数のベクター図形</td>
+              <td class="ts-col">少数のベクター図形</td>
             </tr>
           </tbody>
         </table>

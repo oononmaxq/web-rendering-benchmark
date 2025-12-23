@@ -338,6 +338,30 @@
             h1 {
                 font-size: 32px;
             }
+
+            .demo-button {
+                font-size: 16px;
+                padding: 15px 10px;
+                word-break: keep-all;
+                white-space: normal;
+                line-height: 1.4;
+            }
+
+            .demo-title {
+                font-size: 24px;
+            }
+
+            .subtitle {
+                font-size: 16px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 10px 5px;
+            }
         }
     </style>
 </head>
@@ -353,26 +377,11 @@
         <div class="purpose-section">
             <h2>このページの目的</h2>
             <p>
-                <strong style="color: #f59e0b;">JavaScript (Cannon.js)</strong>と<strong style="color: #22c55e;">Rust + WebAssembly (Rapier)</strong>の3D物理エンジンを、同じ描画エンジン (Three.js) で実装し、純粋な物理演算のパフォーマンス差を体感比較できるデモサイトです。
+                <strong style="color: #22c55e;">Rust + WebAssembly (Rapier)</strong>と<strong style="color: #f59e0b;">JavaScript (Cannon.js)</strong>の3D物理エンジンを、同じ描画エンジン (Three.js) で実装し、純粋な物理演算のパフォーマンス差を体感比較できるデモサイトです。
             </p>
         </div>
 
         <div class="demo-grid">
-            <div class="demo-card" style="border-top: 5px solid #f59e0b;">
-                <div class="demo-title">Cannon.js (JavaScript)</div>
-                <div class="demo-description">
-                    JavaScript製の物理エンジンCannon.jsを使用。Three.jsで3D描画。箱や球を追加して、重力と衝突判定を体験できます。
-                </div>
-                <ul class="demo-features">
-                    <li>物理エンジン: Cannon.js (JavaScript)</li>
-                    <li>描画: Three.js (WebGL)</li>
-                    <li>期待FPS: 50個で60FPS、500個で20-30FPS</li>
-                    <li>OrbitControls (カメラ操作)</li>
-                    <li>リアルタイム影・シャドウマップ</li>
-                </ul>
-                <a href="/3d-simulation/threejs-cannon/" class="demo-button">デモを開く</a>
-            </div>
-
             <div class="demo-card rapier-card">
                 <div class="demo-title">Rapier (Rust + wasm)</div>
                 <div class="demo-description">
@@ -387,6 +396,21 @@
                 </ul>
                 <a href="/3d-simulation/threejs-rapier/" class="demo-button">デモを開く</a>
             </div>
+
+            <div class="demo-card" style="border-top: 5px solid #f59e0b;">
+                <div class="demo-title">Cannon.js (JavaScript)</div>
+                <div class="demo-description">
+                    JavaScript製の物理エンジンCannon.jsを使用。Three.jsで3D描画。箱や球を追加して、重力と衝突判定を体験できます。
+                </div>
+                <ul class="demo-features">
+                    <li>物理エンジン: Cannon.js (JavaScript)</li>
+                    <li>描画: Three.js (WebGL)</li>
+                    <li>期待FPS: 50個で60FPS、500個で20-30FPS</li>
+                    <li>OrbitControls (カメラ操作)</li>
+                    <li>リアルタイム影・シャドウマップ</li>
+                </ul>
+                <a href="/3d-simulation/threejs-cannon/" class="demo-button">デモを開く</a>
+            </div>
         </div>
 
         <div class="comparison-table">
@@ -395,70 +419,70 @@
                 <thead>
                     <tr>
                         <th>項目</th>
-                        <th class="cannon-col">Cannon.js (JavaScript)</th>
                         <th class="rapier-col">Rapier (Rust + wasm)</th>
+                        <th class="cannon-col">Cannon.js (JavaScript)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td>FPS (50個)</td>
-                        <td class="cannon-col">60 FPS (安定)</td>
                         <td class="rapier-col winner">60 FPS (安定)</td>
+                        <td class="cannon-col">60 FPS (安定)</td>
                     </tr>
                     <tr>
                         <td>FPS (100個)</td>
-                        <td class="cannon-col">50-60 FPS</td>
                         <td class="rapier-col winner">60 FPS (安定)</td>
+                        <td class="cannon-col">50-60 FPS</td>
                     </tr>
                     <tr>
                         <td>FPS (500個)</td>
-                        <td class="cannon-col">20-30 FPS (重い)</td>
                         <td class="rapier-col winner">55-60 FPS (安定)</td>
+                        <td class="cannon-col">20-30 FPS (重い)</td>
                     </tr>
                     <tr>
                         <td>FPS (1,000個)</td>
-                        <td class="cannon-col">10-15 FPS (ほぼ停止)</td>
                         <td class="rapier-col winner">40-50 FPS (動作可能)</td>
+                        <td class="cannon-col">10-15 FPS (ほぼ停止)</td>
                     </tr>
                     <tr>
                         <td>実行速度</td>
-                        <td class="cannon-col">JSエンジン依存</td>
                         <td class="rapier-col winner">ネイティブに近い速度</td>
+                        <td class="cannon-col">JSエンジン依存</td>
                     </tr>
                     <tr>
                         <td>衝突判定精度</td>
-                        <td class="cannon-col">標準的</td>
                         <td class="rapier-col winner">高精度</td>
+                        <td class="cannon-col">標準的</td>
                     </tr>
                     <tr>
                         <td>メモリ効率</td>
-                        <td class="cannon-col">GC依存</td>
                         <td class="rapier-col winner">コンパクト・予測可能</td>
+                        <td class="cannon-col">GC依存</td>
                     </tr>
                     <tr>
                         <td>開発難易度</td>
-                        <td class="cannon-col winner">低 (すぐ始められる)</td>
                         <td class="rapier-col">中 (wasmの知識必要)</td>
+                        <td class="cannon-col winner">低 (すぐ始められる)</td>
                     </tr>
                     <tr>
                         <td>ファイルサイズ</td>
-                        <td class="cannon-col winner">約150KB (.js)</td>
                         <td class="rapier-col">約600KB (.wasm)</td>
+                        <td class="cannon-col winner">約150KB (.js)</td>
                     </tr>
                     <tr>
                         <td>初期化時間</td>
-                        <td class="cannon-col winner">即座</td>
                         <td class="rapier-col">約100ms (wasm読込)</td>
+                        <td class="cannon-col winner">即座</td>
                     </tr>
                     <tr>
                         <td>推奨用途</td>
-                        <td class="cannon-col">小規模・プロトタイプ</td>
                         <td class="rapier-col">大規模・本格的な物理演算</td>
+                        <td class="cannon-col">小規模・プロトタイプ</td>
                     </tr>
                     <tr>
                         <td>性能倍率 (500個時)</td>
-                        <td class="cannon-col">1倍 (基準)</td>
                         <td class="rapier-col winner">約2-3倍高速</td>
+                        <td class="cannon-col">1倍 (基準)</td>
                     </tr>
                 </tbody>
             </table>

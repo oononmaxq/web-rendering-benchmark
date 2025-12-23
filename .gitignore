@@ -9,6 +9,4 @@ package-lock.json
 # macOS
 .DS_Store
 
-# Build outputs
-pkg/
-*.wasm
+# Note: pkg/ and *.wasm are NOT ignored because they're needed for GitHub Pages
