@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Rust + WebAssembly + Canvas2D - 100,000 Particles</title>
+    <link rel="stylesheet" href="/particle-simulation/demo-style.css">
+</head>
+<body class="rust-theme">
+    <div class="back-link">
+        <a href="/particle-simulation/">← 比較ページに戻る</a>
+    </div>
+
+    <h1>100,000 Particles - Rust + WebAssembly + Canvas2D</h1>
+
+    <canvas id="canvas" width="1200" height="800"></canvas>
+
+    <div id="stats">
+        <div class="stat">
+            <span class="stat-label">パーティクル数:</span>
+            <span class="stat-value">100,000 個</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">フレームカウント:</span>
+            <span class="stat-value" id="frame-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">FPS:</span>
+            <span class="stat-value" id="fps">60</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">計算エンジン:</span>
+            <span class="stat-value">Rust + WebAssembly</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">描画エンジン:</span>
+            <span class="stat-value">Canvas 2D API</span>
+        </div>
+    </div>
+
+    <button onclick="reset()">リセット</button>
+
+    <div id="message">
+        <p><span class="highlight">クリックして爆発させてください!</span></p>
+        <p>Rustで10万個の物理演算 + Canvas2Dで描画（WebGLなし）</p>
+        <p><strong>注目:</strong> 計算は速いけど、描画がかなり遅い！</p>
+    </div>
+
+    <div class="warning">
+        <p>⚠️ 100,000個のパーティクルをCanvas2Dで描画</p>
+        <p>計算は高速だが、描画がボトルネックでFPSが大幅に低下します</p>
+    </div>
+
+    <script type="module">
+        import init, { ParticleSystemCanvas2D } from './pkg/particle_webgl.js';
+
+        let system;
+        let lastTime = performance.now();
+        let frameCount = 0;
+        let fps = 60;
+
+        async function run() {
+            await init();
+
+            system = new ParticleSystemCanvas2D('canvas', 100000);
+
+            // クリックイベント
+            const canvas = document.getElementById('canvas');
+            canvas.addEventListener('click', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                system.explode(x, y);
+            });
+
+            function animate() {
+                // FPS計算
+                const now = performance.now();
+                const delta = now - lastTime;
+                frameCount++;
+
+                if (frameCount % 60 === 0) {
+                    fps = Math.round(1000 / delta);
+                    document.getElementById('fps').textContent = fps;
+                }
+
+                lastTime = now;
+
+                // Rustで物理演算（速い）
+                system.update();
+
+                // Canvas2Dで描画（遅い！）
+                system.render();
+
+                // フレームカウント更新
+                document.getElementById('frame-count').textContent = system.get_frame_count();
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        window.reset = function() {
+            if (system) {
+                system.reset();
+            }
+        };
+
+        run();
+    </script>
+</body>
+</html>

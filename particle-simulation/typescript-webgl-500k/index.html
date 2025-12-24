@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>TypeScript + WebGL</title>
+    <link rel="stylesheet" href="/particle-simulation/demo-style.css">
+</head>
+<body class="ts-theme">
+    <div class="back-link">
+        <a href="/particle-simulation/">← 比較ページに戻る</a>
+    </div>
+
+    <h1>500,000 Particles - TypeScript + WebGL</h1>
+
+    <canvas id="canvas" width="1200" height="800"></canvas>
+
+    <div id="stats">
+        <div class="stat">
+            <span class="stat-label">パーティクル数:</span>
+            <span class="stat-value">500,000 個</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">フレームカウント:</span>
+            <span class="stat-value" id="frame-count">0</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">FPS:</span>
+            <span class="stat-value" id="fps">60</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">計算エンジン:</span>
+            <span class="stat-value">JavaScript (V8)</span>
+        </div>
+        <div class="stat">
+            <span class="stat-label">描画エンジン:</span>
+            <span class="stat-value">WebGL (GPU加速)</span>
+        </div>
+    </div>
+
+    <button onclick="reset()">リセット</button>
+
+    <div id="message">
+        <p><span class="highlight">クリックして爆発させてください!</span></p>
+        <p>TypeScriptで物理演算 + WebGLでGPU加速描画</p>
+        <p><strong>注目:</strong> 計算は遅いけど、描画が速い！</p>
+    </div>
+
+    <div class="info">
+        <p>✨ GPU描画の威力を体感</p>
+        <p>計算はJavaScriptだが、WebGLのおかげで快適に動作します</p>
+    </div>
+
+    <script type="module">
+        import { PHYSICS_CONSTANTS } from '/particle-simulation/physics-constants.js';
+
+        const PARTICLE_COUNT = 500000;
+        const GRAVITY = PHYSICS_CONSTANTS.GRAVITY;
+        const BOUNCE = PHYSICS_CONSTANTS.BOUNCE;
+        const EXPLOSION_FORCE = PHYSICS_CONSTANTS.EXPLOSION_FORCE;
+        const EXPLOSION_RADIUS = PHYSICS_CONSTANTS.EXPLOSION_RADIUS;
+        const FRICTION = PHYSICS_CONSTANTS.FRICTION;
+
+        class Particle {
+            constructor(width, height) {
+                const angle = Math.random() * 2 * Math.PI;
+                const speed = Math.random() * (PHYSICS_CONSTANTS.INITIAL_SPEED_MAX - PHYSICS_CONSTANTS.INITIAL_SPEED_MIN) + PHYSICS_CONSTANTS.INITIAL_SPEED_MIN;
+
+                this.x = width / 2;
+                this.y = height / 4;
+                this.vx = Math.cos(angle) * speed;
+                this.vy = Math.sin(angle) * speed + PHYSICS_CONSTANTS.INITIAL_VY_OFFSET;
+                this.hue = Math.random() * 360;
+            }
+
+            update(width, height) {
+                // JavaScript で物理演算 (遅い)
+                this.vy += GRAVITY;
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > width) {
+                    this.vx *= -BOUNCE;
+                    this.x = Math.max(0, Math.min(width, this.x));
+                }
+
+                if (this.y < 0) {
+                    this.vy *= -BOUNCE;
+                    this.y = 0;
+                }
+
+                if (this.y > height) {
+                    this.vy *= -BOUNCE;
+                    this.y = height;
+                    this.vx *= FRICTION;
+                }
+
+                this.hue = (this.hue + PHYSICS_CONSTANTS.HUE_SHIFT_SPEED) % 360;
+            }
+
+            explode(clickX, clickY) {
+                const dx = this.x - clickX;
+                const dy = this.y - clickY;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < EXPLOSION_RADIUS) {
+                    const force = EXPLOSION_FORCE * (1.0 - dist / EXPLOSION_RADIUS);
+                    const angle = Math.atan2(dy, dx);
+                    this.vx += Math.cos(angle) * force;
+                    this.vy += Math.sin(angle) * force;
+                }
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const gl = canvas.getContext('webgl');
+        const width = canvas.width;
+        const height = canvas.height;
+
+        if (!gl) {
+            alert('WebGL not supported');
+            throw new Error('WebGL not supported');
+        }
+
+        // 頂点シェーダー
+        const vertexShaderSource = `
+            attribute vec2 a_position;
+            attribute vec3 a_color;
+            uniform float u_pointSize;
+            varying vec3 v_color;
+
+            void main() {
+                gl_Position = vec4(a_position, 0.0, 1.0);
+                gl_PointSize = u_pointSize;
+                v_color = a_color;
+            }
+        `;
+
+        // フラグメントシェーダー
+        const fragmentShaderSource = `
+            precision mediump float;
+            varying vec3 v_color;
+
+            void main() {
+                gl_FragColor = vec4(v_color, 0.8);
+            }
+        `;
+
+        function compileShader(gl, source, type) {
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                console.error('Shader compile error:', gl.getShaderInfoLog(shader));
+                gl.deleteShader(shader);
+                return null;
+            }
+
+            return shader;
+        }
+
+        const vertexShader = compileShader(gl, vertexShaderSource, gl.VERTEX_SHADER);
+        const fragmentShader = compileShader(gl, fragmentShaderSource, gl.FRAGMENT_SHADER);
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vertexShader);
+        gl.attachShader(program, fragmentShader);
+        gl.linkProgram(program);
+
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+            console.error('Program link error:', gl.getProgramInfoLog(program));
+        }
+
+        gl.useProgram(program);
+
+        const positionBuffer = gl.createBuffer();
+        const colorBuffer = gl.createBuffer();
+
+        let particles = [];
+        let frameCount = 0;
+        let lastTime = performance.now();
+        let fps = 60;
+
+        function createParticles() {
+            particles = [];
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                particles.push(new Particle(width, height));
+            }
+            frameCount = 0;
+        }
+
+        createParticles();
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            particles.forEach(p => p.explode(x, y));
+        });
+
+        window.reset = createParticles;
+
+        function hslToRgb(h, s, l) {
+            const c = (1.0 - Math.abs(2.0 * l - 1.0)) * s;
+            const hPrime = h / 60.0;
+            const x = c * (1.0 - Math.abs((hPrime % 2.0) - 1.0));
+
+            let r1, g1, b1;
+            if (hPrime < 1.0) {
+                [r1, g1, b1] = [c, x, 0.0];
+            } else if (hPrime < 2.0) {
+                [r1, g1, b1] = [x, c, 0.0];
+            } else if (hPrime < 3.0) {
+                [r1, g1, b1] = [0.0, c, x];
+            } else if (hPrime < 4.0) {
+                [r1, g1, b1] = [0.0, x, c];
+            } else if (hPrime < 5.0) {
+                [r1, g1, b1] = [x, 0.0, c];
+            } else {
+                [r1, g1, b1] = [c, 0.0, x];
+            }
+
+            const m = l - c / 2.0;
+            return [r1 + m, g1 + m, b1 + m];
+        }
+
+        function animate() {
+            const now = performance.now();
+            const delta = now - lastTime;
+            frameCount++;
+
+            if (frameCount % 60 === 0) {
+                fps = Math.round(1000 / delta);
+                document.getElementById('fps').textContent = fps;
+            }
+
+            lastTime = now;
+
+            // JavaScriptで物理演算 (遅い)
+            particles.forEach(p => p.update(width, height));
+
+            // WebGLで描画 (速い!)
+            gl.clearColor(0.1, 0.1, 0.1, 1.0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+
+            const positions = new Float32Array(particles.length * 2);
+            const colors = new Float32Array(particles.length * 3);
+
+            for (let i = 0; i < particles.length; i++) {
+                const p = particles[i];
+                positions[i * 2] = (p.x / width) * 2.0 - 1.0;
+                positions[i * 2 + 1] = 1.0 - (p.y / height) * 2.0;
+
+                const rgb = hslToRgb(p.hue, 1.0, 0.5);
+                colors[i * 3] = rgb[0];
+                colors[i * 3 + 1] = rgb[1];
+                colors[i * 3 + 2] = rgb[2];
+            }
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, positions, gl.DYNAMIC_DRAW);
+            const positionAttrib = gl.getAttribLocation(program, 'a_position');
+            gl.vertexAttribPointer(positionAttrib, 2, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(positionAttrib);
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+            gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+            const colorAttrib = gl.getAttribLocation(program, 'a_color');
+            gl.vertexAttribPointer(colorAttrib, 3, gl.FLOAT, false, 0, 0);
+            gl.enableVertexAttribArray(colorAttrib);
+
+            const pointSizeLocation = gl.getUniformLocation(program, 'u_pointSize');
+            gl.uniform1f(pointSizeLocation, 2.5 * 2.0);
+
+            gl.drawArrays(gl.POINTS, 0, particles.length);
+
+            document.getElementById('frame-count').textContent = frameCount;
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

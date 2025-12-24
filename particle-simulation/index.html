@@ -29,7 +29,7 @@
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 1600px;
         margin: 0 auto;
       }
 
@@ -65,7 +65,7 @@
 
       .comparison-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        grid-template-columns: repeat(5, 1fr);
         gap: 30px;
         margin-bottom: 60px;
       }
@@ -225,6 +225,36 @@
       }
 
       .threejs-card .demo-button:hover {
+        box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
+          inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+      }
+
+      .ts-webgl-card::before {
+        background: linear-gradient(90deg, #fbbf24, #10b981);
+      }
+
+      .ts-webgl-card:hover {
+        box-shadow: 13px 13px 20px rgba(163, 177, 198, 0.7),
+          -13px -13px 20px rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
+      }
+
+      .ts-webgl-card .card-title {
+        color: #10b981;
+      }
+
+      .ts-webgl-card .spec-value {
+        color: #10b981;
+      }
+
+      .ts-webgl-card .demo-button {
+        background: #e0e5ec;
+        color: #10b981;
+        box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6),
+          -6px -6px 12px rgba(255, 255, 255, 0.5);
+      }
+
+      .ts-webgl-card .demo-button:hover {
         box-shadow: inset 4px 4px 8px rgba(163, 177, 198, 0.6),
           inset -4px -4px 8px rgba(255, 255, 255, 0.5);
       }
@@ -418,6 +448,12 @@
       .winner::after {
         content: " ✓";
         color: #22c55e;
+      }
+
+      @media (max-width: 1400px) {
+        .comparison-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
       }
 
       @media (max-width: 768px) {
@@ -620,6 +656,48 @@
           </div>
 
           <a href="/particle-simulation/rust-wasm-canvas2d/" class="demo-button">10,000個デモ</a>
+          <a href="/particle-simulation/rust-wasm-canvas2d-100k/" class="demo-button">100,000個デモ</a>
+          <a href="/particle-simulation/rust-wasm-canvas2d-500k/" class="demo-button">500,000個デモ</a>
+        </div>
+
+        <div class="card ts-webgl-card">
+          <div class="card-title">TypeScript + WebGL</div>
+
+          <ul class="tech-stack">
+            <li>
+              言語:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/JavaScript/Reference"
+                target="_blank"
+                >TypeScript</a
+              >
+            </li>
+            <li>ランタイム: JavaScript (V8)</li>
+            <li>
+              描画:
+              <a
+                href="https://developer.mozilla.org/ja/docs/Web/API/WebGL_API"
+                target="_blank"
+                >WebGL</a
+              >
+              (GPU加速)
+            </li>
+            <li>ビルドツール: なし</li>
+          </ul>
+
+          <div class="spec">
+            <div class="spec-title">パーティクル数</div>
+            <div class="spec-value">10,000 個</div>
+          </div>
+
+          <div class="spec">
+            <div class="spec-title">期待FPS</div>
+            <div class="spec-value">55-60 FPS</div>
+          </div>
+
+          <a href="/particle-simulation/typescript-webgl/" class="demo-button">10,000個デモ</a>
+          <a href="/particle-simulation/typescript-webgl-100k/" class="demo-button">100,000個デモ</a>
+          <a href="/particle-simulation/typescript-webgl-500k/" class="demo-button">500,000個デモ</a>
         </div>
 
         <div class="card ts-card">
@@ -731,6 +809,7 @@
               <th>項目</th>
               <th class="rust-col">WASM + WebGL</th>
               <th style="color: #22d3ee;">WASM + Canvas2D</th>
+              <th style="color: #10b981;">TS + WebGL</th>
               <th class="ts-col">TS + Canvas2D</th>
               <th class="ts-col">TS + SVG</th>
             </tr>
@@ -740,6 +819,7 @@
               <td>FPS (10,000個)</td>
               <td class="rust-col winner">60 FPS (安定)</td>
               <td style="color: #22d3ee;">35-45 FPS</td>
+              <td style="color: #10b981;" class="winner">55-60 FPS</td>
               <td class="ts-col">40-50 FPS</td>
               <td class="ts-col">5-15 FPS</td>
             </tr>
@@ -747,6 +827,7 @@
               <td>計算速度</td>
               <td class="rust-col winner">超高速 (WASM)</td>
               <td style="color: #22d3ee;" class="winner">超高速 (WASM)</td>
+              <td style="color: #10b981;">普通 (JS)</td>
               <td class="ts-col">普通 (JS)</td>
               <td class="ts-col">普通 (JS)</td>
             </tr>
@@ -754,6 +835,7 @@
               <td>描画速度</td>
               <td class="rust-col winner">超高速 (GPU)</td>
               <td style="color: #22d3ee;">遅い (CPU)</td>
+              <td style="color: #10b981;" class="winner">超高速 (GPU)</td>
               <td class="ts-col">遅い (CPU)</td>
               <td class="ts-col">超遅い (DOM)</td>
             </tr>
@@ -761,6 +843,7 @@
               <td>描画方式</td>
               <td class="rust-col winner">GPU加速 (WebGL)</td>
               <td style="color: #22d3ee;">CPU描画 (Canvas2D)</td>
+              <td style="color: #10b981;" class="winner">GPU加速 (WebGL)</td>
               <td class="ts-col">CPU描画 (Canvas2D)</td>
               <td class="ts-col">DOM操作 (最遅)</td>
             </tr>
@@ -768,6 +851,7 @@
               <td>ボトルネック</td>
               <td class="rust-col">なし</td>
               <td style="color: #22d3ee;"><strong>描画が遅い</strong></td>
+              <td style="color: #10b981;"><strong>計算が遅い</strong></td>
               <td class="ts-col">計算＋描画</td>
               <td class="ts-col">DOM操作</td>
             </tr>
@@ -775,13 +859,15 @@
               <td>メモリ効率</td>
               <td class="rust-col winner">最高</td>
               <td style="color: #22d3ee;" class="winner">最高</td>
+              <td style="color: #10b981;">GC依存</td>
               <td class="ts-col">GC依存</td>
               <td class="ts-col">DOM要素で巨大</td>
             </tr>
             <tr>
               <td>開発難易度</td>
-              <td class="rust-col">高 (WebGL必須)</td>
-              <td style="color: #22d3ee;">中 (Canvas2D)</td>
+              <td class="rust-col">高 (Rust+WebGL)</td>
+              <td style="color: #22d3ee;">中 (Rust)</td>
+              <td style="color: #10b981;">中 (WebGL)</td>
               <td class="ts-col winner">低 (すぐ始められる)</td>
               <td class="ts-col winner">最低 (宣言的)</td>
             </tr>
@@ -789,6 +875,7 @@
               <td>推奨用途</td>
               <td class="rust-col">大規模・超高速処理</td>
               <td style="color: #22d3ee;">計算重視 (描画少)</td>
+              <td style="color: #10b981;">中大規模GPU描画</td>
               <td class="ts-col">中規模アニメーション</td>
               <td class="ts-col">少数のベクター図形</td>
             </tr>
