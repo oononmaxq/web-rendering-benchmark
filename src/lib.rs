@@ -3,6 +3,8 @@ use web_sys::{WebGlRenderingContext, WebGlProgram, WebGlBuffer};
 use rand::Rng;
 use std::f32::consts::PI;
 
+pub mod canvas2d;
+
 const GRAVITY: f32 = 0.0002;
 const BOUNCE: f32 = 0.85;
 const EXPLOSION_FORCE: f32 = 8.0;
